@@ -13,6 +13,10 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/register", (req, res) => {
+  res.render("register.ejs");
+})
+
 router.post("/register", async (req, res) => {
   const { name, email, password, contact } = req.body;
   const user = await User.findOne({
