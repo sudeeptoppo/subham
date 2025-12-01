@@ -15,9 +15,10 @@ router.get("/", (req, res) => {
 
 router.get("/register", (req, res) => {
   res.render("register.ejs");
-})
+});
 
 router.post("/register", async (req, res) => {
+  console.log(req.body);
   const { name, email, password, contact } = req.body;
   const user = await User.findOne({
     $or: [
@@ -46,9 +47,11 @@ router.post("/register", async (req, res) => {
     contact: contact,
   });
   await newUser.save();
-  res.json({
-    message: "User registered successfully",
-  });
+  res.redirect("/api/user/login");
+});
+
+router.get("/login", (req, res) => {
+  res.render("login.ejs");
 });
 
 router.post("/login", async (req, res) => {
@@ -58,6 +61,7 @@ router.post("/login", async (req, res) => {
   if (!user) {
     return res.status(400).json({
       message: `user noot found of name ${name}`,
+      req: req.user,
     });
   }
 
@@ -76,11 +80,12 @@ router.post("/login", async (req, res) => {
   res.json({
     message: "User logged in successfully",
     token: token,
+    abc: user,
   });
 });
 
 //logout
-router.get("/logout",auth, (req, res) => {
+router.get("/logout", auth, (req, res) => {
   console.log(req.user);
   res.json({
     message: "User logged out successfully",
