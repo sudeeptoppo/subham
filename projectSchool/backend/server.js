@@ -1,10 +1,15 @@
-require("dotenv").config();
-
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
+const rootRouter = require("./routes/index");
+require("dotenv").config();
 
-const port = 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use("/api/v1", rootRouter);
+const port = process.env.PORT || 3000;
 
 const connectDB = async () => {
   try {
