@@ -1,17 +1,17 @@
-export function Appbar() {
+export function Appbar({user}) {
   return (
-    <div className="border border-red-500 shadow h-14 flex justify-between ">
-      <div className="border border-red-500 flex items-center ml-4">
-        PayTM App
+    <div className="shadow h-14 flex justify-between ">
+      <div className="flex items-center ml-4">
+        Digital Learning
       </div>
 
-      <div className="border border-red-500 flex ">
-        <div className="border border-red-500 flex flex-col justify-center  mr-4">
+      <div className="flex ">
+        <div className="flex flex-col justify-center  mr-4">
           Hello
         </div>
-        <div className="border border-red-500 bg-slate-200 h-12 w-12 rounded-full flex justify-center ">
-          <div className="border border-red-500 flex flex-col justify-center">
-            U
+        <div className=" bg-slate-200 h-12 w-12 rounded-full flex justify-center ">
+          <div className="flex flex-col justify-center">
+            {user && user.firstname ? user.firstname[0].toUpperCase() : "Loading..."}
           </div>
         </div>
       </div>
