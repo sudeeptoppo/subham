@@ -2,10 +2,12 @@ import { Appbar } from "../components/Appbar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
 import { Name } from "../components/dashboard/Name";
+import Snowfall from 'react-snowfall'
 export const Dashboard = () => {
   return (
     <div>
-      <div className="m-8">
+      <div className="m-8 bg-black">
+        <Snowfall></Snowfall>
         {/* <Users /> */}
         <Name></Name>
         <script

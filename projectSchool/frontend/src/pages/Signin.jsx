@@ -7,6 +7,7 @@ import { BottomWarning } from "../components/BottomWarning";
 import { MovingText } from "../components/MovingText";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Snowfall from 'react-snowfall'
 export function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +16,7 @@ export function Signin() {
     <div className="bg-slate-300 h-screen flex justify-center ">
       <div className="flex flex-col  justify-center ">
         <div className="bg-white rounded-lg w-80 text-center p-2  px-4">
+          <Snowfall snowflakeCount={50} />
           <Heading label={"sign in"}></Heading>
           <SubHeading
             label={"Enter your information to access the account"}

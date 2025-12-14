@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 function signToken(user) {
-  const payload = { id: user._id, role: user.role };
+  const payload = { userId: user._id, role: user.role };
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 }
 

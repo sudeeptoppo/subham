@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { SelectBox } from "../components/SelectBox";
 import { MovingText } from "../components/MovingText";
+import Snowfall from 'react-snowfall'
 export function Signup() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -19,6 +20,7 @@ export function Signup() {
     <div className="bg-slate-300 h-screen flex justify-center ">
       <div className="flex flex-col  justify-center ">
         <div className="bg-white rounded-lg w-80 text-center p-2  px-4">
+          <Snowfall snowflakeCount={50} />
           <Heading label={"sign up"}></Heading>
           <SubHeading
             label={"Enter your information to create an account"}

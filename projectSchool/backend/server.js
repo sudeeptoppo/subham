@@ -3,8 +3,7 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const rootRouter = require("./routes/index");
-require("dotenv").config();
-
+require("dotenv").config( { quiet: true });
 
 app.use(cors());
 app.use(express.json());
