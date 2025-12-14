@@ -17,6 +17,7 @@ export function Signin() {
     <div className=" h-screen flex justify-center ">
       <div className="flex flex-col  justify-center ">
         <div className="bg-white rounded-lg w-80 text-center p-2  px-4">
+          
           <Snowfall snowflakeCount={50} />
           <Heading label={"sign in"}></Heading>
           <SubHeading

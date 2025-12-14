@@ -10,7 +10,7 @@ export const Dashboard = () => {
       <div className="m-8 bg-black">
         
         {/* <Users /> */}
-        {/* <Name></Name> */}
+        <Name></Name>
         
         <script
           type="module"

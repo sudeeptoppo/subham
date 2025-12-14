@@ -89,8 +89,8 @@ export function MovingText({
       
       {/* Control indicator */}
       <div className="absolute bottom-1 right-2 z-10">
-        <div className="text-xs text-white bg-black/50 px-2 py-1 rounded">
-          {isPaused ? '⏸️ Paused' : '▶️ Playing'}
+        <div className="text-xs text-white px-2 py-1 rounded">
+          {isPaused ? '' : ''}
         </div>
       </div>
     </div>
