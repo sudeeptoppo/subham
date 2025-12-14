@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export function MovingText({
-  text = "Breaking News: This is a moving text component!",
+  text = "Breaking News: Its beginning to look like Christmas!",
   direction = 'left',
   speed = 'normal',
   pauseOnHover = true,
