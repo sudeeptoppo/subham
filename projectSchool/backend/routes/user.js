@@ -5,7 +5,7 @@ const { signup, login } = require("../utils/middleware/zod.js");
 const { signToken } = require("../utils/jwt.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const {authMiddleware} = require("../utils/middleware/authMiddleware.js");
+const { authMiddleware } = require("../utils/middleware/authMiddleware.js");
 
 router.post("/signup", signup, async (req, res) => {
   const { firstName, lastName, email, password, role } = req.body;
@@ -67,8 +67,14 @@ router.post("/signin", login, async (req, res) => {
   });
 });
 
-router.get("/me", authMiddleware, async (req, res) => {
+router.post("/signout", authMiddleware, async (req, res) => {
+  localStorage.removeItem("token");
+  res.json({
+    message: "User logged out successfully",
+  });
+});
 
+router.get("/me", authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.userId).select("-password");
   if (!user) {
     return res.status(404).json({ message: "User not found" });
