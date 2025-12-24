@@ -4,6 +4,7 @@ const { authMiddleware } = require("../utils/middleware/authMiddleware.js");
 const { roleMiddleware } = require("../utils/middleware/role.js");
 const { Quiz } = require("../schema/quiz.js");
 const { Question } = require("../schema/question");
+const { QuizAttempt } = require("../schema/quizAttempt.js");
 
 // creating quiz
 router.post(
@@ -31,29 +32,29 @@ router.post(
   }
 );
 
-// getting all quizzes
-router.get(
-  "/:quizId/questions",
-  authMiddleware,
-  roleMiddleware(["teacher"]),
-  async (req, res) => {
-    const { quizId } = req.params;
+// Teacher: get all questions of a quiz (full data)
+// router.get(
+//   "/:quizId/questions",
+//   authMiddleware,
+//   roleMiddleware(["teacher"]),
+//   async (req, res) => {
+//     const { quizId } = req.params;
 
-    const Questions = await Question.find({ quizId });
-    if (!Questions) {
-      return res
-        .status(404)
-        .json({ message: "the Quiz you are looking for is not available" });
-    }
-    console.log(Questions, " ", quizId, " ", Questions.length);
-    res.json({
-      quizId,
-      totalQuestions: Questions.length,
-      Questions,
-      message: "Quiz fetched successfully",
-    });
-  }
-);
+//     const Questions = await Question.find({ quizId });
+//     if (!Questions) {
+//       return res
+//         .status(404)
+//         .json({ message: "the Quiz you are looking for is not available" });
+//     }
+//     console.log(Questions, " ", quizId, " ", Questions.length);
+//     res.json({
+//       quizId,
+//       totalQuestions: Questions.length,
+//       Questions,
+//       message: "Quiz fetched successfully",
+//     });
+//   }
+// );
 
 // adding questions to quiz
 router.post(
@@ -115,53 +116,50 @@ router.get(
 );
 
 // getting questions for a quiz
-router.get("/:quizId/questions", authMiddleware, async (req, res) => {
-  const { quizId } = req.params;
-  const quiz = await Quiz.findById(quizId);
-  if (!quiz) {
-    return res
-      .status(404)
-      .json({ message: "Quiz not found or not published yet" });
-  }
-  let questions;
-  if (req.user.role === "teacher") {
-    questions = await Question.find({ quizId });
-  }
-  if (req.user.role === "student") {
-    questions = await Question.find({ quizId }).select(
-      "questionText options.text marks"
-    );
-  }
-  res.json({ quizId, totalQuestions: questions.length, questions });
-});
-
-//preventing multiple quiz attempts by same student
-router.post(
-  "/:quizId/start",
+router.get(
+  "/:quizId/questions",
   authMiddleware,
-  roleMiddleware(["Student"]),
   async (req, res) => {
-    const existingAttempt = await QuizAttempt.findOne({
-      quizId: req.params.quizId,
-      studentId: req.user.userId
-    });
+    const { quizId } = req.params;
 
-    if (existingAttempt) {
-      return res.status(400).json({ message: "Quiz already started" });
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ message: "Quiz not found" });
     }
 
-    const attempt = await QuizAttempt.create({
-      quizId: req.params.quizId,
-      studentId: req.user.userId
-    });
+    let questions;
+
+    // 👨‍🏫 Teacher → full questions
+    if (req.user.role === "teacher") {
+      questions = await Question.find({ quizId });
+    }
+
+    // 👨‍🎓 Student → must have started quiz
+    if (req.user.role === "student") {
+      const attempt = await QuizAttempt.findOne({
+        quizId,
+        studentId: req.user.userId,
+      });
+
+      if (!attempt) {
+        return res
+          .status(403)
+          .json({ message: "Start quiz before viewing questions" });
+      }
+
+      questions = await Question.find({ quizId }).select(
+        "questionText options.text marks"
+      );
+    }
 
     res.json({
-      message: "Quiz started",
-      attemptId: attempt._id
+      quizId,
+      totalQuestions: questions.length,
+      questions,
     });
   }
 );
-
+  
 
 // starting a quiz
 router.post(
@@ -170,26 +168,43 @@ router.post(
   roleMiddleware(["student"]),
   async (req, res) => {
     const { quizId } = req.params;
+    console.log(quizId);
     const quiz = await Quiz.findOne({
       _id: req.params.quizId,
       isPublished: true,
     });
+    // console.log(quiz);
 
     if (!quiz) {
       return res.status(404).json({ message: "Quiz not available" });
     }
 
-    const questions = await Question.find({ quizId: quiz._id }).select(
-      "questionText options.text marks"
-    );
+    // If user is student, check for existing attempt
+    // console.log(req.params.quizId, " ", req.user.userId);
+    if (req.user.role === "student") {
+      const existingAttempt = await QuizAttempt.findOne({
+        quizId: req.params.quizId,
+        studentId: req.user.userId,
+      });
+      // console.log(existingAttempt);
 
-    res.json({
-      quizId: quiz._id,
-      title: quiz.title,
-      timeLimit: quiz.timeLimit || 10,
-      totalQuestions: questions.length,
-      questions,
-    });
+      if (existingAttempt) {
+        return res.status(400).json({ message: "Quiz already started" });
+      }
+
+      // Create attempt for student
+      const attempt = await QuizAttempt.create({
+        quizId: req.params.quizId,
+        studentId: req.user.userId,
+      });
+
+      res.json({
+        message: "Quiz started successfully",
+        attemptId: attempt._id,
+      });
+    } else {
+      return res.status(403).json({ message: "Only students can start quizzes" });
+    }
   }
 );
 
@@ -197,14 +212,14 @@ router.post(
 router.post(
   "/:quizId/submit",
   authMiddleware,
-  roleMiddleware(["Student"]),
+
   async (req, res) => {
     const { answers } = req.body;
 
     const attempt = await QuizAttempt.findOne({
       quizId: req.params.quizId,
       studentId: req.user.userId,
-      status: "IN_PROGRESS"
+      status: "IN_PROGRESS",
     });
 
     if (!attempt) {
@@ -217,7 +232,7 @@ router.post(
     for (const ans of answers) {
       const question = await Question.findById(ans.questionId);
 
-      const correctOption = question.options.find(opt => opt.isCorrect);
+      const correctOption = question.options.find((opt) => opt.isCorrect);
 
       const isCorrect = correctOption.text === ans.selectedOption;
       const marksAwarded = isCorrect ? question.marks : 0;
@@ -228,7 +243,7 @@ router.post(
         questionId: question._id,
         selectedOption: ans.selectedOption,
         isCorrect,
-        marksAwarded
+        marksAwarded,
       });
     }
 
@@ -240,7 +255,7 @@ router.post(
 
     res.json({
       message: "Quiz submitted successfully",
-      score
+      score,
     });
   }
 );
@@ -249,11 +264,11 @@ router.post(
 router.get(
   "/:quizId/result",
   authMiddleware,
-  roleMiddleware(["Student"]),
+  roleMiddleware(["student"]),
   async (req, res) => {
     const attempt = await QuizAttempt.findOne({
       quizId: req.params.quizId,
-      studentId: req.user.userId
+      studentId: req.user.userId,
     }).select("-answers.isCorrect");
 
     if (!attempt) {
@@ -264,27 +279,23 @@ router.get(
   }
 );
 
-
 // teacher view results of a quiz
 router.get(
   "/:quizId/results",
   authMiddleware,
-  roleMiddleware(["Teacher"]),
+  roleMiddleware(["teacher"]),
   async (req, res) => {
     const results = await QuizAttempt.find({
       quizId: req.params.quizId,
-      status: "SUBMITTED"
+      status: "SUBMITTED",
     }).populate("studentId", "firstname lastname email");
 
     res.json({
       totalSubmissions: results.length,
-      results
+      results,
     });
   }
 );
-
-
-
 
 // router.post(
 //   "/quizCreated",
