@@ -5,6 +5,9 @@ import { Signin } from "./pages/Signin";
 
 import { Dashboard } from "./pages/Dashboard";
 import { Signup } from "./pages/Signup";
+import { AllQuiz } from "./pages/AllQuiz";
+import { SendMoney } from "./pages/SendMoney";
+
 
 function App() {
   return (
@@ -15,6 +18,8 @@ function App() {
           <Route path="/Dashboard" element={<Dashboard />} />
           <Route path="/Signin" element={<Signin />} />
           <Route path="/Signup" element={<Signup />} />
+          <Route path="/AllQuiz" element={<AllQuiz />} />
+
         </Routes>
       </BrowserRouter>
     </>

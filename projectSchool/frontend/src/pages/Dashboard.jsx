@@ -1,25 +1,12 @@
-import { Appbar } from "../components/Appbar";
-import { Balance } from "../components/Balance";
-import { Users } from "../components/Users";
-import { Name } from "../components/dashboard/Name";
-import { Question } from "../components/Quiz/Question";
-import { Options } from "../components/Quiz/Options";
-import  FullQuizPage  from "../components/Quiz/FullQuizPage";
-import { AllQuiz } from "../components/Quiz/AllQuiz";
+import { useNavigate } from "react-router-dom";
+import ThemeSwitch from "../components/theme/ThemeSwitch";
 export const Dashboard = () => {
+  const navigate = useNavigate();
   return (
     <div>
-      <div className="m-8 ">
-        
-        <AllQuiz />
-        
-
-        <script
-          type="module"
-          src="https://unpkg.com/@splinetool/viewer@1.12.16/build/spline-viewer.js"
-        ></script>
-        
-      </div>
+      <button onClick={() => navigate("/AllQuiz")}>Attempt Quiz</button>
+      <h1 className="text-[#808080]">Dashboard</h1>
+      <ThemeSwitch />
     </div>
   );
 };
